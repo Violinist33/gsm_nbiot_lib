@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "sim7020py"
+version = "0.1.0"
+description = ""
+authors = "Antonii Lupandin"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+asttokens = "^2.4.1"
+executing = "^2.1.0"
+colorama = "^0.4.6"
+rich = "^13.9.3"
+ruff = "^0.7.1"
+loguru = "^0.7.2"
+pygments = "^2.18.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
