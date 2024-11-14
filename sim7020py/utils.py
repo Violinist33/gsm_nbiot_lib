@@ -1,9 +1,10 @@
 import logging
 import time
 import json
-from typing import Callable, Any, Optional, Union
+from typing import Callable, Any
 
 logging.basicConfig(level=logging.INFO)
+
 
 def save_state(filename: str, variable: Any, mode: str = 'w') -> None:
     """
@@ -12,12 +13,13 @@ def save_state(filename: str, variable: Any, mode: str = 'w') -> None:
     Args:
         filename (str): The name of the file to save the variable to.
         variable (Any): The variable whose value is to be saved.
-        mode (str, optional): The mode to open the file in. Defaults to 'w' (write mode).
+        mode (str): The mode to open the file in. Defaults to 'w' (write mode).
     """
     with open(filename, mode) as f:
         f.write(str(variable))
 
-def load_state(filename: str) -> Union[str, int]:
+
+def load_state(filename: str) -> str | int:
     """
     Reads a variable's value from a file.
 
@@ -25,7 +27,7 @@ def load_state(filename: str) -> Union[str, int]:
         filename (str): The name of the file to read the variable from.
 
     Returns:
-        Union[str, int]: The content read from the file. If the file does not exist, a default value of 0 is saved to the file and returned.
+        str | int: The content read from the file. If the file does not exist, a default value of 0 is saved to the file and returned.
     """
     try:
         with open(filename, 'r') as f:
@@ -34,6 +36,7 @@ def load_state(filename: str) -> Union[str, int]:
     except OSError:
         save_state(filename, 0)
         return 0
+
 
 def parse_response(response: str) -> tuple[str, list[str]]:
     """
@@ -55,7 +58,8 @@ def parse_response(response: str) -> tuple[str, list[str]]:
         parameters = parts[1].split(',')
     return command_name, parameters
 
-def parse_signal_quality(response: list[str]) -> Optional[tuple[int, int]]:
+
+def parse_signal_quality(response: list[str]) -> tuple[int, int] | None:
     """
     Parses the response from the AT+CSQ command to retrieve signal quality.
 
@@ -63,14 +67,12 @@ def parse_signal_quality(response: list[str]) -> Optional[tuple[int, int]]:
         response (list[str]): The response from the AT+CSQ command.
 
     Returns:
-        Optional[tuple[int, int]]: Tuple (RSSI, BER) if successful, or None if parsing fails.
+        tuple[int, int] | None: Tuple (RSSI, BER) if successful, or None if parsing fails.
     """
     try:
         for line in response:
             if line.startswith("+CSQ:"):
                 _, signal_info = line.split(": ")
-                rssi: int
-                ber: int
                 rssi, ber = map(int, signal_info.split(","))
                 return rssi, ber
     except (ValueError, IndexError) as e:
@@ -78,13 +80,14 @@ def parse_signal_quality(response: list[str]) -> Optional[tuple[int, int]]:
 
     return None
 
+
 def validate_response(response: list[str], expected_keyword: str = "OK") -> bool:
     """
     Checks if the response contains an expected keyword, typically to confirm a command succeeded.
 
     Args:
         response (list[str]): The response received from the module.
-        expected_keyword (str, optional): The keyword expected in the response. Defaults to "OK".
+        expected_keyword (str): The keyword expected in the response. Defaults to "OK".
 
     Returns:
         bool: True if the keyword is found, False otherwise.
@@ -95,7 +98,8 @@ def validate_response(response: list[str], expected_keyword: str = "OK") -> bool
         logging.warning(f"Expected keyword '{expected_keyword}' not found in response: {response}")
         return False
 
-def parse_http_response(response: list[str]) -> Optional[str]:
+
+def parse_http_response(response: list[str]) -> str | None:
     """
     Parses the HTTP response from Blynk or other servers, returning useful data.
 
@@ -103,7 +107,7 @@ def parse_http_response(response: list[str]) -> Optional[str]:
         response (list[str]): The HTTP response from the AT+HTTPGET or AT+HTTPPOST command.
 
     Returns:
-        Optional[str]: Useful data from the response, or None if parsing fails.
+        str | None: Useful data from the response, or None if parsing fails.
     """
     try:
         data: str = response[-1].strip()
@@ -112,17 +116,18 @@ def parse_http_response(response: list[str]) -> Optional[str]:
         logging.error(f"Error parsing HTTP response: {e}")
         return None
 
-def retry_operation(operation: Callable[[], Any], max_retries: int = 3, delay: int = 1) -> Optional[Any]:
+
+def retry_operation(operation: Callable[[], Any], max_retries: int = 3, delay: int = 1) -> Any | None:
     """
     Retries an operation several times in case of failure.
 
     Args:
         operation (Callable[[], Any]): A function or lambda expression to execute.
-        max_retries (int, optional): The maximum number of retry attempts. Defaults to 3.
-        delay (int, optional): Delay between attempts (in seconds). Defaults to 1.
+        max_retries (int): The maximum number of retry attempts. Defaults to 3.
+        delay (int): Delay between attempts (in seconds). Defaults to 1.
 
     Returns:
-        Optional[Any]: Result of the operation if successful, or None if all retries fail.
+        Any | None: Result of the operation if successful, or None if all retries fail.
     """
     for attempt in range(max_retries):
         try:
@@ -135,13 +140,14 @@ def retry_operation(operation: Callable[[], Any], max_retries: int = 3, delay: i
     logging.error("Operation failed after all retry attempts")
     return None
 
-def format_at_command(command: str, params: Optional[list[str]] = None) -> str:
+
+def format_at_command(command: str, params: list[str] | None = None) -> str:
     """
     Formats an AT command with optional parameters.
 
     Args:
         command (str): The base AT command (e.g., "AT+CSQ").
-        params (Optional[list[str]], optional): Parameters to append to the command.
+        params (list[str] | None): Parameters to append to the command.
 
     Returns:
         str: Formatted AT command string.
@@ -150,16 +156,17 @@ def format_at_command(command: str, params: Optional[list[str]] = None) -> str:
         return f"{command}={','.join(map(str, params))}"
     return command
 
-def handle_timeout(operation: Callable[[], Any], timeout: int = 5) -> Optional[Any]:
+
+def handle_timeout(operation: Callable[[], Any], timeout: int = 5) -> Any | None:
     """
     Executes an operation with a specified timeout.
 
     Args:
         operation (Callable[[], Any]): Function to execute.
-        timeout (int, optional): Time limit for the operation (in seconds). Defaults to 5.
+        timeout (int): Time limit for the operation (in seconds). Defaults to 5.
 
     Returns:
-        Optional[Any]: Result of the operation if successful within timeout, or None if timeout occurs.
+        Any | None: Result of the operation if successful within timeout, or None if timeout occurs.
     """
     start_time: float = time.time()
     while time.time() - start_time < timeout:
@@ -172,7 +179,8 @@ def handle_timeout(operation: Callable[[], Any], timeout: int = 5) -> Optional[A
     logging.error("Operation timed out")
     return None
 
-def extract_json_data(response: list[str]) -> Optional[dict]:
+
+def extract_json_data(response: list[str]) -> dict | None:
     """
     Attempts to extract JSON-formatted data from an HTTP response string.
 
@@ -180,7 +188,7 @@ def extract_json_data(response: list[str]) -> Optional[dict]:
         response (list[str]): The HTTP response from the module.
 
     Returns:
-        Optional[dict]: Parsed JSON data as a dictionary, or None if extraction fails.
+        dict | None: Parsed JSON data as a dictionary, or None if extraction fails.
     """
     try:
         data: dict = json.loads(response[-1])  # Assuming JSON is in the last line

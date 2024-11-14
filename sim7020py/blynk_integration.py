@@ -1,14 +1,15 @@
 from .sim7020 import SIM7020
 import time
 import logging
-from typing import Optional, Union
 
 logging.basicConfig(level=logging.INFO)
+
 
 class BlynkIntegration:
     """Class for integrating with the Blynk platform using the SIM7020 module."""
 
-    def __init__(self, port: str, apn: str, blynk_token: str, baudrate: int = 9600, timeout: int = 1, max_retries: int = 3):
+    def __init__(self, port: str, apn: str, blynk_token: str, baudrate: int = 9600, timeout: int = 1,
+                 max_retries: int = 3):
         """
         Initializes Blynk integration with APN settings and access token.
 
@@ -16,9 +17,9 @@ class BlynkIntegration:
             port (str): UART port for SIM7020 (e.g., "/dev/ttyUSB0" for Linux).
             apn (str): APN name for network connection.
             blynk_token (str): Access token for Blynk.
-            baudrate (int, optional): UART connection speed. Defaults to 9600.
-            timeout (int, optional): Response timeout. Defaults to 1.
-            max_retries (int, optional): Max retries on data send/receive failure. Defaults to 3.
+            baudrate (int): UART connection speed. Defaults to 9600.
+            timeout (int): Response timeout. Defaults to 1.
+            max_retries (int): Max retries on data send/receive failure. Defaults to 3.
         """
         self.sim7020: SIM7020 = SIM7020(port, baudrate, timeout)
         self.apn: str = apn
@@ -70,7 +71,7 @@ class BlynkIntegration:
 
         logging.error(f"Failed to send value to virtual pin {virtual_pin} after {self.max_retries} attempts")
 
-    def get_value(self, virtual_pin: int) -> Optional[str]:
+    def get_value(self, virtual_pin: int) -> str | None:
         """
         Retrieves data from a specified virtual pin on Blynk.
 
@@ -78,7 +79,7 @@ class BlynkIntegration:
             virtual_pin (int): Virtual pin number on Blynk.
 
         Returns:
-            Optional[str]: Retrieved value or None on error.
+            str | None: Retrieved value or None on error.
         """
         self.ensure_connection()
 
