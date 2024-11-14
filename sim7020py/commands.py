@@ -1,57 +1,53 @@
-# src/gsm_serial_lib/commands.py
-
 import time
-import serial  # Предполагается, что библиотека PySerial используется для UART
-
+import serial  # Assumes the PySerial library is used for UART communication
 
 class ATCommandError(Exception):
-    """Исключение для ошибок AT-команд"""
+    """Exception for AT command errors."""
     pass
 
-
 class ATCommand:
-    """Класс для отправки и обработки AT-команд к модулю SIM7020 через UART."""
+    """Class for sending and handling AT commands to the SIM7020 module over UART."""
 
     def __init__(self, port, baudrate=9600, timeout=1):
         """
-        Инициализация подключения к модулю через UART.
+        Initializes the connection to the module via UART.
 
-        :param port: Порт UART (например, "/dev/ttyUSB0" для Linux)
-        :param baudrate: Скорость передачи данных
-        :param timeout: Таймаут ожидания ответа
+        :param port: UART port (e.g., "/dev/ttyUSB0" for Linux)
+        :param baudrate: Data transmission rate
+        :param timeout: Response timeout
         """
         self.serial = serial.Serial(port, baudrate, timeout=timeout)
 
     def send_command(self, command, expected_response="OK", delay=0.5):
         """
-        Отправка AT-команды и ожидание ответа.
+        Sends an AT command and waits for a response.
 
-        :param command: AT-команда для отправки
-        :param expected_response: Ожидаемый ответ (по умолчанию "OK")
-        :param delay: Задержка перед чтением ответа
-        :return: Ответ от модуля
+        :param command: The AT command to send
+        :param expected_response: Expected response (default is "OK")
+        :param delay: Delay before reading the response
+        :return: Response from the module
         """
-        # Очистка буфера и отправка команды
+        # Clear the buffer and send the command
         self.serial.reset_input_buffer()
         self.serial.write((command + "\r\n").encode())
 
         time.sleep(delay)
         response = self.serial.readlines()
 
-        # Преобразуем байты в строки и убираем лишние символы
+        # Convert bytes to strings and remove extra characters
         response = [line.decode().strip() for line in response]
 
-        # Проверка на ожидаемый ответ
+        # Check for the expected response
         if expected_response not in response:
-            raise ATCommandError(f"Не удалось получить ожидаемый ответ: {expected_response}")
+            raise ATCommandError(f"Failed to receive expected response: {expected_response}")
 
         return response
 
     def check_connection(self):
         """
-        Проверка соединения с модулем через команду AT.
+        Checks the connection with the module using the AT command.
 
-        :return: True, если модуль отвечает, иначе False
+        :return: True if the module responds, otherwise False
         """
         try:
             response = self.send_command("AT")
@@ -61,33 +57,33 @@ class ATCommand:
 
     def get_signal_quality(self):
         """
-        Запрос уровня сигнала у модуля (команда AT+CSQ).
+        Requests the signal quality from the module (AT+CSQ command).
 
-        :return: Уровень сигнала (включает RSSI и BER)
+        :return: Signal quality (includes RSSI and BER)
         """
         response = self.send_command("AT+CSQ")
 
-        # Ожидаем, что ответ будет в формате "+CSQ: <rssi>,<ber>"
+        # Expected response format: "+CSQ: <rssi>,<ber>"
         for line in response:
             if line.startswith("+CSQ:"):
                 _, signal_info = line.split(": ")
                 rssi, ber = signal_info.split(",")
                 return int(rssi), int(ber)
 
-        raise ATCommandError("Не удалось получить уровень сигнала")
+        raise ATCommandError("Failed to retrieve signal quality")
 
     def set_apn(self, apn):
         """
-        Установка APN (Access Point Name) для подключения к сети.
+        Sets the APN (Access Point Name) for network connection.
 
-        :param apn: Название APN
+        :param apn: APN name
         :return: None
         """
         self.send_command(f'AT+CGDCONT=1,"IP","{apn}"')
 
     def connect_network(self):
         """
-        Подключение к сети (команда AT+CGATT=1).
+        Connects to the network (AT+CGATT=1 command).
 
         :return: None
         """
@@ -95,7 +91,7 @@ class ATCommand:
 
     def disconnect_network(self):
         """
-        Отключение от сети (команда AT+CGATT=0).
+        Disconnects from the network (AT+CGATT=0 command).
 
         :return: None
         """
@@ -103,6 +99,6 @@ class ATCommand:
 
     def close(self):
         """
-        Закрытие соединения с UART.
+        Closes the UART connection.
         """
         self.serial.close()
