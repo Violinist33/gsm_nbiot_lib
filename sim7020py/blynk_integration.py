@@ -1,5 +1,5 @@
 # src/gsm_serial_lib/blynk_integration.py
-#sim7020py/blynk_integration.py
+# sim7020py/blynk_integration.py
 
 from .sim7020 import SIM7020
 import time
@@ -9,18 +9,18 @@ logging.basicConfig(level=logging.INFO)
 
 
 class BlynkIntegration:
-    """Класс для интеграции с платформой Blynk через SIM7020."""
+    """Class for integration with the Blynk platform via SIM7020."""
 
     def __init__(self, port, apn, blynk_token, baudrate=9600, timeout=1, max_retries=3):
         """
-        Инициализация Blynk-интеграции с настройкой APN и токена.
+        Initializes Blynk integration with APN and token settings.
 
-        :param port: Порт UART для SIM7020 (например, "/dev/ttyUSB0" для Linux)
-        :param apn: Название APN для подключения к сети
-        :param blynk_token: Токен доступа Blynk
-        :param baudrate: Скорость передачи данных по UART
-        :param timeout: Таймаут ожидания ответа
-        :param max_retries: Максимальное количество попыток при сбое отправки/получения данных
+        :param port: UART port for SIM7020 (e.g., "/dev/ttyUSB0" for Linux)
+        :param apn: APN name for network connection
+        :param blynk_token: Access token for Blynk
+        :param baudrate: Baud rate for UART communication
+        :param timeout: Timeout for response wait
+        :param max_retries: Maximum retry attempts on data send/receive failure
         """
         self.sim7020 = SIM7020(port, baudrate, timeout)
         self.apn = apn
@@ -30,32 +30,32 @@ class BlynkIntegration:
 
     def connect(self):
         """
-        Подключение к сети и инициализация соединения с Blynk.
+        Connects to the network and initializes the Blynk connection.
         """
         try:
             self.sim7020.initialize()
             self.sim7020.set_apn(self.apn)
             self.sim7020.connect_network()
             self.connected = True
-            logging.info("Соединение с сетью и Blynk установлено")
+            logging.info("Connected to network and Blynk")
         except Exception as e:
-            logging.error(f"Ошибка подключения: {e}")
+            logging.error(f"Connection error: {e}")
             self.connected = False
 
     def ensure_connection(self):
         """
-        Проверка подключения и попытка переподключения при необходимости.
+        Checks the connection and attempts to reconnect if necessary.
         """
         if not self.connected:
-            logging.info("Попытка переподключения...")
+            logging.info("Attempting reconnection...")
             self.connect()
 
     def send_value(self, virtual_pin, value):
         """
-        Отправка данных на определенный виртуальный пин на Blynk-сервер.
+        Sends data to a specified virtual pin on the Blynk server.
 
-        :param virtual_pin: Номер виртуального пина на Blynk
-        :param value: Значение для отправки
+        :param virtual_pin: Virtual pin number on Blynk
+        :param value: Value to be sent
         """
         self.ensure_connection()
 
@@ -63,21 +63,20 @@ class BlynkIntegration:
         for attempt in range(self.max_retries):
             try:
                 self.sim7020.at_command.send_command(command, expected_response="OK")
-                logging.info(f"Значение {value} отправлено на виртуальный пин {virtual_pin}")
+                logging.info(f"Value {value} sent to virtual pin {virtual_pin}")
                 return
             except Exception as e:
-                logging.warning(f"Попытка {attempt + 1} не удалась: {e}")
-                time.sleep(1)  # Небольшая пауза перед повторной попыткой
+                logging.warning(f"Attempt {attempt + 1} failed: {e}")
+                time.sleep(1)  # Small pause before retrying
 
-        logging.error(
-            f"Не удалось отправить значение на виртуальный пин {virtual_pin} после {self.max_retries} попыток")
+        logging.error(f"Failed to send value to virtual pin {virtual_pin} after {self.max_retries} attempts")
 
     def get_value(self, virtual_pin):
         """
-        Получение данных с определенного виртуального пина на Blynk-сервере.
+        Retrieves data from a specified virtual pin on the Blynk server.
 
-        :param virtual_pin: Номер виртуального пина на Blynk
-        :return: Полученное значение или None при ошибке
+        :param virtual_pin: Virtual pin number on Blynk
+        :return: Retrieved value or None if an error occurs
         """
         self.ensure_connection()
 
@@ -85,27 +84,27 @@ class BlynkIntegration:
         for attempt in range(self.max_retries):
             try:
                 response = self.sim7020.at_command.send_command(command, expected_response="OK")
-                data = response[-1].split()[-1]  # Пример парсинга ответа
-                logging.info(f"Получено значение {data} с виртуального пина {virtual_pin}")
+                data = response[-1].split()[-1]  # Example response parsing
+                logging.info(f"Retrieved value {data} from virtual pin {virtual_pin}")
                 return data
             except Exception as e:
-                logging.warning(f"Попытка {attempt + 1} не удалась: {e}")
+                logging.warning(f"Attempt {attempt + 1} failed: {e}")
                 time.sleep(1)
 
-        logging.error(f"Не удалось получить данные с виртуального пина {virtual_pin} после {self.max_retries} попыток")
+        logging.error(f"Failed to retrieve data from virtual pin {virtual_pin} after {self.max_retries} attempts")
         return None
 
     def disconnect(self):
         """
-        Отключение от Blynk и сети NB-IoT.
+        Disconnects from Blynk and NB-IoT network.
         """
         self.sim7020.disconnect_network()
         self.connected = False
-        logging.info("Отключено от Blynk и сети NB-IoT")
+        logging.info("Disconnected from Blynk and NB-IoT network")
 
     def close(self):
         """
-        Завершение работы с модулем SIM7020.
+        Closes the connection with the SIM7020 module.
         """
         self.sim7020.close()
-        logging.info("Закрыто соединение с SIM7020")
+        logging.info("Closed connection with SIM7020")
