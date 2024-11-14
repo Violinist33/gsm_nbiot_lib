@@ -1,8 +1,8 @@
 # main.py
-from sim7020py.commands import ATCommandError
-from sim7020py.sim7020 import SIM7020
-from sim7020py.blynk_integration import BlynkIntegration
-from sim7020py.utils import save_state, load_state, parse_response
+from sim7020py import ATCommandError
+from sim7020py import SIM7020
+from sim7020py import BlynkIntegration
+from sim7020py import save_state, load_state, parse_response
 import utime
 from machine import Pin, deepsleep, lightsleep
 
