@@ -8,35 +8,43 @@ from machine import Pin, deepsleep, lightsleep
 
 from config import *
 
+# Initialize device and setup pins
+led_onboard = Pin(LED_PIN, Pin.OUT)
+led_main = Pin(LED_PIN_MAIN, Pin.OUT)
+pwr_key = Pin(PWR_EN, Pin.OUT)
+
+# Instantiate SIM7020 and Blynk classes
+sim_7020 = SIM7020(port=UART_PORT, baudrate=UART_BAUDRATE)
+blynk = BlynkIntegration(port=UART_PORT, apn=APN, blynk_token=BLYNK_TOKEN)
 
 # Power control functions
 def power_on():
-    PWR_KEY.value(1)
+    pwr_key.value(1)
 
 
 def power_off():
-    PWR_KEY.value(0)
+    pwr_key.value(0)
 
 
 # LED blink function
 def led_blink(num_blinks=4, time_between=0.5):
     """Blinks the onboard LED a specified number of times."""
-    prev = LED_ONBOARD.value()
+    prev = led_onboard.value()
     for _ in range(num_blinks):
-        LED_ONBOARD.value(1)
+        led_onboard.value(1)
         utime.sleep(time_between)
-        LED_ONBOARD.value(0)
+        led_onboard.value(0)
         utime.sleep(time_between)
-    LED_ONBOARD.value(prev)
+    led_onboard.value(prev)
 
 
 # Connect to network and initialize Blynk
 def initialize_connection():
     power_on()
-    SIM_7020.initialize()
-    SIM_7020.set_apn(APN)
-    SIM_7020.connect_network()
-    BLYNK.connect()
+    sim_7020.initialize()
+    sim_7020.set_apn(APN)
+    sim_7020.connect_network()
+    blynk.connect()
 
 
 # Parse response (if needed as a standalone function)
@@ -49,7 +57,7 @@ def parse_at_response(response):
 # Example of sending AT commands and processing response
 def send_and_process(cmd):
     try:
-        response = SIM_7020.at_command.send_command(cmd)
+        response = sim_7020.at_command.send_command(cmd)
         parse_at_response(response)
     except ATCommandError as e:
         print(f"Error: {e}")
@@ -66,8 +74,8 @@ def mqtt_connect():
 def toggle_lamp_state(state_file='state.db'):
     current_state = load_state(state_file)
     lamp_is_on = int(current_state) if current_state else 1
-    LED_MAIN.value(lamp_is_on)
-    LED_ONBOARD.value(not lamp_is_on)
+    led_main.value(lamp_is_on)
+    led_onboard.value(not lamp_is_on)
     return lamp_is_on
 
 
@@ -83,13 +91,13 @@ def main():
     while True:
         print("Checking for commands...")
         # Request the value of a pin from Blynk
-        BLYNK.get_value("V0")
+        blynk.get_value("V0")
 
         # Toggle LED states based on lamp state
         lamp_is_on = not lamp_is_on
         save_state('state.db', lamp_is_on)
-        LED_MAIN.value(lamp_is_on)
-        LED_ONBOARD.value(not lamp_is_on)
+        led_main.value(lamp_is_on)
+        led_onboard.value(not lamp_is_on)
         utime.sleep(2)  # Add a delay
 
         # Example of sending and receiving data over MQTT (if needed)

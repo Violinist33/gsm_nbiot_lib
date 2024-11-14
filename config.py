@@ -13,12 +13,3 @@ LED_PIN_MAIN = 2  # external led
 PWR_EN = 14  # power control pin for SIM7020
 UART_PORT = 0
 UART_BAUDRATE = 115200
-
-# Initialize device and setup pins
-LED_ONBOARD = Pin(LED_PIN, Pin.OUT)
-LED_MAIN = Pin(LED_PIN_MAIN, Pin.OUT)
-PWR_KEY = Pin(PWR_EN, Pin.OUT)
-
-# Instantiate SIM7020 and Blynk classes
-SIM_7020 = SIM7020(port=UART_PORT, baudrate=UART_BAUDRATE)
-BLYNK = BlynkIntegration(port=UART_PORT, apn=APN, blynk_token=BLYNK_TOKEN)
