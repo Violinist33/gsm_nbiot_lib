@@ -1,179 +1,96 @@
 from .commands import ATCommand, ATCommandError
 
+
 class SIM7020:
     """Class for controlling the SIM7020 module using AT commands."""
 
-    def __init__(self, port, baudrate=9600, timeout=1):
+    def __init__(self, port: str, baudrate: int = 9600, timeout: int = 1):
         """
-        Initializes the SIM7020 with specified port and UART parameters.
+        Initializes the SIM7020 with the specified port and UART parameters.
 
-        :param port: UART port (e.g., "/dev/ttyUSB0" for Linux)
-        :param baudrate: Data transmission rate
-        :param timeout: Response timeout
+        Args:
+            port (str): UART port (e.g., "/dev/ttyUSB0" for Linux).
+            baudrate (int, optional): Data transmission rate. Defaults to 9600.
+            timeout (int, optional): Response timeout. Defaults to 1.
         """
-        self.at_command = ATCommand(port, baudrate, timeout)
+        # Initializes ATCommand instance to manage commands with specified port, baudrate, and timeout
+        self.at_command: ATCommand = ATCommand(port, baudrate, timeout)
 
-    def initialize(self):
+    def initialize(self) -> None:
         """
-        Initial configuration of the module: checks connection and sets initial parameters.
+        Performs the initial configuration of the module: checks the connection and sets initial parameters.
 
-        :return: None
+        Raises:
+            ATCommandError: If connection to the SIM7020 module cannot be established.
         """
+        # Checks connection status and raises ATCommandError if connection fails
         if not self.at_command.check_connection():
             raise ATCommandError("Failed to establish connection with SIM7020 module")
 
         print("SIM7020 module successfully connected")
 
-    def set_apn(self, apn):
+    def set_apn(self, apn: str) -> None:
         """
         Sets the APN for network connection.
 
-        :param apn: APN name
-        :return: None
+        Args:
+            apn (str): APN name for the network.
         """
+        # Sends APN configuration command
         self.at_command.set_apn(apn)
         print(f"APN '{apn}' successfully set")
 
-    def connect_network(self):
+    def connect_network(self) -> None:
         """
-        Connects to the NB-IoT network.
-
-        :return: None
+        Connects the module to the NB-IoT network.
         """
+        # Sends network connection command
         self.at_command.connect_network()
         print("Network connection established")
 
-    def disconnect_network(self):
+    def disconnect_network(self) -> None:
         """
-        Disconnects from the NB-IoT network.
-
-        :return: None
+        Disconnects the module from the NB-IoT network.
         """
+        # Sends network disconnection command
         self.at_command.disconnect_network()
         print("Network disconnection completed")
 
-    def get_signal_quality(self):
+    def get_signal_quality(self) -> tuple[int, int]:
         """
-        Retrieves the signal quality from the module.
+        Retrieves the signal quality metrics from the module.
 
-        :return: Tuple (RSSI, BER)
+        Returns:
+            tuple[int, int]: RSSI (Received Signal Strength Indicator) and BER (Bit Error Rate).
         """
+        # Retrieves RSSI and BER values from the module
+        rssi: int  # Received Signal Strength Indicator
+        ber: int  # Bit Error Rate
         rssi, ber = self.at_command.get_signal_quality()
         print(f"Signal quality: RSSI={rssi}, BER={ber}")
         return rssi, ber
 
-    def send_data(self, data):
+    def send_data(self, data: str) -> None:
         """
         Sends data through the module.
 
-        :param data: Data to send
-        :return: None
+        Args:
+            data (str): Data to be sent through the SIM7020 module.
+
+        Raises:
+            ATCommandError: If an error occurs during data transmission.
         """
-        # Example command for data sending (may require configuration for specific platform)
-        # This section might need customization depending on the operator and data format.
         try:
+            # Sends data transmission command with specified data
             self.at_command.send_command(f'AT+SEND={data}', expected_response="SEND OK")
             print("Data successfully sent")
         except ATCommandError:
             print("Error occurred while sending data")
 
-    def close(self):
+    def close(self) -> None:
         """
-        Terminates module usage and closes the UART connection.
-
-        :return: None
+        Terminates usage of the module and closes the UART connection.
         """
+        # Closes the AT command interface and ends the connection
         self.at_command.close()
         print("Connection with the module closed")
-
-
-
-
-# from .commands import ATCommand, ATCommandError
-#
-#
-# class SIM7020:
-#     """Класс для управления модулем SIM7020 с помощью AT-команд."""
-#
-#     def __init__(self, port, baudrate=9600, timeout=1):
-#         """
-#         Инициализация SIM7020 с указанием порта и параметров UART.
-#
-#         :param port: Порт UART (например, "/dev/ttyUSB0" для Linux)
-#         :param baudrate: Скорость передачи данных
-#         :param timeout: Таймаут ожидания ответа
-#         """
-#         self.at_command = ATCommand(port, baudrate, timeout)
-#
-#     def initialize(self):
-#         """
-#         Первоначальная настройка модуля: проверка связи и установки начальных параметров.
-#
-#         :return: None
-#         """
-#         if not self.at_command.check_connection():
-#             raise ATCommandError("Не удалось установить связь с модулем SIM7020")
-#
-#         print("Модуль SIM7020 успешно подключен")
-#
-#     def set_apn(self, apn):
-#         """
-#         Установка APN для подключения к сети.
-#
-#         :param apn: Название APN
-#         :return: None
-#         """
-#         self.at_command.set_apn(apn)
-#         print(f"APN '{apn}' успешно установлен")
-#
-#     def connect_network(self):
-#         """
-#         Подключение к сети NB-IoT.
-#
-#         :return: None
-#         """
-#         self.at_command.connect_network()
-#         print("Подключение к сети выполнено")
-#
-#     def disconnect_network(self):
-#         """
-#         Отключение от сети NB-IoT.
-#
-#         :return: None
-#         """
-#         self.at_command.disconnect_network()
-#         print("Отключение от сети выполнено")
-#
-#     def get_signal_quality(self):
-#         """
-#         Получение уровня сигнала от модуля.
-#
-#         :return: Кортеж (RSSI, BER)
-#         """
-#         rssi, ber = self.at_command.get_signal_quality()
-#         print(f"Уровень сигнала: RSSI={rssi}, BER={ber}")
-#         return rssi, ber
-#
-#     def send_data(self, data):
-#         """
-#         Отправка данных через модуль.
-#
-#         :param data: Данные для отправки
-#         :return: None
-#         """
-#         # Пример команды для отправки данных (для настройки на определенной платформе)
-#         # Эта часть может потребовать уточнения в зависимости от оператора и формата данных.
-#         try:
-#             self.at_command.send_command(f'AT+SEND={data}', expected_response="SEND OK")
-#             print("Данные успешно отправлены")
-#         except ATCommandError:
-#             print("Ошибка при отправке данных")
-#
-#     def close(self):
-#         """
-#         Завершение работы с модулем, закрытие UART-соединения.
-#
-#         :return: None
-#         """
-#         self.at_command.close()
-#         print("Соединение с модулем закрыто")

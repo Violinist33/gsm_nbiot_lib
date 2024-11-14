@@ -1,104 +1,118 @@
 import time
-import serial  # Assumes the PySerial library is used for UART communication
+import serial  # Library for UART communication
 
 class ATCommandError(Exception):
     """Exception for AT command errors."""
     pass
 
 class ATCommand:
-    """Class for sending and handling AT commands to the SIM7020 module over UART."""
+    """Class for sending and handling AT commands for the SIM7020 module via UART."""
 
-    def __init__(self, port, baudrate=9600, timeout=1):
+    def __init__(self, port: str, baudrate: int = 9600, timeout: int = 1):
         """
-        Initializes the connection to the module via UART.
+        Initializes the connection with the module via UART.
 
-        :param port: UART port (e.g., "/dev/ttyUSB0" for Linux)
-        :param baudrate: Data transmission rate
-        :param timeout: Response timeout
+        Args:
+            port (str): UART port (e.g., "/dev/ttyUSB0" for Linux).
+            baudrate (int, optional): Data transmission speed. Defaults to 9600.
+            timeout (int, optional): Response timeout. Defaults to 1.
         """
-        self.serial = serial.Serial(port, baudrate, timeout=timeout)
+        # Serial instance for UART communication setup
+        self.serial: serial.Serial = serial.Serial(port, baudrate, timeout=timeout)
 
-    def send_command(self, command, expected_response="OK", delay=0.5):
+    def send_command(self, command: str, expected_response: str = "OK", delay: float = 0.5) -> list[str]:
         """
         Sends an AT command and waits for a response.
 
-        :param command: The AT command to send
-        :param expected_response: Expected response (default is "OK")
-        :param delay: Delay before reading the response
-        :return: Response from the module
+        Args:
+            command (str): AT command to send.
+            expected_response (str, optional): Expected response. Defaults to "OK".
+            delay (float, optional): Delay before reading the response. Defaults to 0.5 seconds.
+
+        Returns:
+            list[str]: Response from the module.
+
+        Raises:
+            ATCommandError: If the expected response is not received.
         """
-        # Clear the buffer and send the command
+        # Clears the buffer and sends the command
         self.serial.reset_input_buffer()
         self.serial.write((command + "\r\n").encode())
 
+        # Delay to ensure module has time to respond
         time.sleep(delay)
-        response = self.serial.readlines()
+        # Readlines to capture response, and decode bytes to string format
+        response: list[str] = [line.decode().strip() for line in self.serial.readlines()]
 
-        # Convert bytes to strings and remove extra characters
-        response = [line.decode().strip() for line in response]
-
-        # Check for the expected response
+        # Checks for the presence of the expected response
         if expected_response not in response:
-            raise ATCommandError(f"Failed to receive expected response: {expected_response}")
+            raise ATCommandError(f"Expected response '{expected_response}' not received")
 
         return response
 
-    def check_connection(self):
+    def check_connection(self) -> bool:
         """
-        Checks the connection with the module using the AT command.
+        Checks connection with the module using the AT command.
 
-        :return: True if the module responds, otherwise False
+        Returns:
+            bool: True if the module responds, otherwise False.
         """
         try:
-            response = self.send_command("AT")
+            response: list[str] = self.send_command("AT")
             return "OK" in response
         except ATCommandError:
             return False
 
-    def get_signal_quality(self):
+    def get_signal_quality(self) -> tuple[int, int]:
         """
-        Requests the signal quality from the module (AT+CSQ command).
+        Requests signal quality from the module (AT+CSQ command).
 
-        :return: Signal quality (includes RSSI and BER)
+        Returns:
+            tuple[int, int]: Signal quality (RSSI and BER).
+
+        Raises:
+            ATCommandError: If signal quality could not be obtained.
         """
-        response = self.send_command("AT+CSQ")
+        response: list[str] = self.send_command("AT+CSQ")
 
-        # Expected response format: "+CSQ: <rssi>,<ber>"
+        # Expected format: "+CSQ: <rssi>,<ber>"
         for line in response:
             if line.startswith("+CSQ:"):
                 _, signal_info = line.split(": ")
-                rssi, ber = signal_info.split(",")
-                return int(rssi), int(ber)
+                rssi: int  # Received Signal Strength Indicator
+                ber: int  # Bit Error Rate
+                rssi, ber = map(int, signal_info.split(","))
+                return rssi, ber
 
-        raise ATCommandError("Failed to retrieve signal quality")
+        raise ATCommandError("Signal quality could not be obtained")
 
-    def set_apn(self, apn):
+    def set_apn(self, apn: str) -> None:
         """
         Sets the APN (Access Point Name) for network connection.
 
-        :param apn: APN name
-        :return: None
+        Args:
+            apn (str): APN name.
         """
+        # Sends command to set APN
         self.send_command(f'AT+CGDCONT=1,"IP","{apn}"')
 
-    def connect_network(self):
+    def connect_network(self) -> None:
         """
         Connects to the network (AT+CGATT=1 command).
-
-        :return: None
         """
+        # Sends network connection command
         self.send_command("AT+CGATT=1")
 
-    def disconnect_network(self):
+    def disconnect_network(self) -> None:
         """
         Disconnects from the network (AT+CGATT=0 command).
-
-        :return: None
         """
+        # Sends network disconnection command
         self.send_command("AT+CGATT=0")
 
-    def close(self):
+    def close(self) -> None:
         """
         Closes the UART connection.
         """
+        # Closes the serial communication
         self.serial.close()

@@ -1,36 +1,34 @@
-# src/gsm_serial_lib/blynk_integration.py
-# sim7020py/blynk_integration.py
-
 from .sim7020 import SIM7020
 import time
 import logging
+from typing import Optional, Union
 
 logging.basicConfig(level=logging.INFO)
 
-
 class BlynkIntegration:
-    """Class for integration with the Blynk platform via SIM7020."""
+    """Class for integrating with the Blynk platform using the SIM7020 module."""
 
-    def __init__(self, port, apn, blynk_token, baudrate=9600, timeout=1, max_retries=3):
+    def __init__(self, port: str, apn: str, blynk_token: str, baudrate: int = 9600, timeout: int = 1, max_retries: int = 3):
         """
-        Initializes Blynk integration with APN and token settings.
+        Initializes Blynk integration with APN settings and access token.
 
-        :param port: UART port for SIM7020 (e.g., "/dev/ttyUSB0" for Linux)
-        :param apn: APN name for network connection
-        :param blynk_token: Access token for Blynk
-        :param baudrate: Baud rate for UART communication
-        :param timeout: Timeout for response wait
-        :param max_retries: Maximum retry attempts on data send/receive failure
+        Args:
+            port (str): UART port for SIM7020 (e.g., "/dev/ttyUSB0" for Linux).
+            apn (str): APN name for network connection.
+            blynk_token (str): Access token for Blynk.
+            baudrate (int, optional): UART connection speed. Defaults to 9600.
+            timeout (int, optional): Response timeout. Defaults to 1.
+            max_retries (int, optional): Max retries on data send/receive failure. Defaults to 3.
         """
-        self.sim7020 = SIM7020(port, baudrate, timeout)
-        self.apn = apn
-        self.blynk_token = blynk_token
-        self.max_retries = max_retries
-        self.connected = False
+        self.sim7020: SIM7020 = SIM7020(port, baudrate, timeout)
+        self.apn: str = apn
+        self.blynk_token: str = blynk_token
+        self.max_retries: int = max_retries
+        self.connected: bool = False  # Tracks connection status
 
-    def connect(self):
+    def connect(self) -> None:
         """
-        Connects to the network and initializes the Blynk connection.
+        Connects to the network and initializes a connection with Blynk.
         """
         try:
             self.sim7020.initialize()
@@ -42,24 +40,25 @@ class BlynkIntegration:
             logging.error(f"Connection error: {e}")
             self.connected = False
 
-    def ensure_connection(self):
+    def ensure_connection(self) -> None:
         """
-        Checks the connection and attempts to reconnect if necessary.
+        Checks the connection and attempts reconnection if needed.
         """
         if not self.connected:
             logging.info("Attempting reconnection...")
             self.connect()
 
-    def send_value(self, virtual_pin, value):
+    def send_value(self, virtual_pin: int, value: str) -> None:
         """
-        Sends data to a specified virtual pin on the Blynk server.
+        Sends data to a specified virtual pin on Blynk.
 
-        :param virtual_pin: Virtual pin number on Blynk
-        :param value: Value to be sent
+        Args:
+            virtual_pin (int): Virtual pin number on Blynk.
+            value (str): Value to send.
         """
         self.ensure_connection()
 
-        command = f"AT+HTTPGET=\"http://{self.blynk_server_ip}/{self.blynk_token}/update/{virtual_pin}?value={value}\""
+        command: str = f"AT+HTTPGET=\"http://{self.blynk_server_ip}/{self.blynk_token}/update/{virtual_pin}?value={value}\""
         for attempt in range(self.max_retries):
             try:
                 self.sim7020.at_command.send_command(command, expected_response="OK")
@@ -67,24 +66,27 @@ class BlynkIntegration:
                 return
             except Exception as e:
                 logging.warning(f"Attempt {attempt + 1} failed: {e}")
-                time.sleep(1)  # Small pause before retrying
+                time.sleep(1)
 
         logging.error(f"Failed to send value to virtual pin {virtual_pin} after {self.max_retries} attempts")
 
-    def get_value(self, virtual_pin):
+    def get_value(self, virtual_pin: int) -> Optional[str]:
         """
-        Retrieves data from a specified virtual pin on the Blynk server.
+        Retrieves data from a specified virtual pin on Blynk.
 
-        :param virtual_pin: Virtual pin number on Blynk
-        :return: Retrieved value or None if an error occurs
+        Args:
+            virtual_pin (int): Virtual pin number on Blynk.
+
+        Returns:
+            Optional[str]: Retrieved value or None on error.
         """
         self.ensure_connection()
 
-        command = f"AT+HTTPGET=\"http://{self.blynk_server_ip}/{self.blynk_token}/get/{virtual_pin}\""
+        command: str = f"AT+HTTPGET=\"http://{self.blynk_server_ip}/{self.blynk_token}/get/{virtual_pin}\""
         for attempt in range(self.max_retries):
             try:
-                response = self.sim7020.at_command.send_command(command, expected_response="OK")
-                data = response[-1].split()[-1]  # Example response parsing
+                response: list[str] = self.sim7020.at_command.send_command(command, expected_response="OK")
+                data: str = response[-1].split()[-1]  # Example response parsing
                 logging.info(f"Retrieved value {data} from virtual pin {virtual_pin}")
                 return data
             except Exception as e:
@@ -94,15 +96,15 @@ class BlynkIntegration:
         logging.error(f"Failed to retrieve data from virtual pin {virtual_pin} after {self.max_retries} attempts")
         return None
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """
-        Disconnects from Blynk and NB-IoT network.
+        Disconnects from Blynk and the NB-IoT network.
         """
         self.sim7020.disconnect_network()
         self.connected = False
         logging.info("Disconnected from Blynk and NB-IoT network")
 
-    def close(self):
+    def close(self) -> None:
         """
         Closes the connection with the SIM7020 module.
         """
