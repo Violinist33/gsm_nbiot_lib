@@ -17,6 +17,7 @@ pwr_key = Pin(PWR_EN, Pin.OUT)
 sim_7020 = SIM7020(port=UART_PORT, baudrate=UART_BAUDRATE)
 blynk = BlynkIntegration(port=UART_PORT, apn=APN, blynk_token=BLYNK_TOKEN)
 
+
 # Power control functions
 def power_on():
     pwr_key.value(1)

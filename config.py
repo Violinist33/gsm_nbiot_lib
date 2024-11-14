@@ -8,8 +8,8 @@ DEVICE_SECRET: str = config("DEVICE_SECRET", cast=str)
 
 
 # Hardware configuration
-LED_PIN = 25  # onboard led
-LED_PIN_MAIN = 2  # external led
-PWR_EN = 14  # power control pin for SIM7020
-UART_PORT = 0
-UART_BAUDRATE = 115200
+LED_PIN: int = 25  # onboard led
+LED_PIN_MAIN: int = 2  # external led
+PWR_EN: int = 14  # power control pin for SIM7020
+UART_PORT: int = 0
+UART_BAUDRATE: int = 115200
