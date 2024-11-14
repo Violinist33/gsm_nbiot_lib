@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sim7020py"
-version = "0.1.1"
+version = "0.1.2"
 description = ""
 authors = ["Antonii Lupandin"]
 readme = "README.md"
@@ -15,6 +15,7 @@ rich = "^13.9.3"
 ruff = "^0.7.1"
 loguru = "^0.7.2"
 pygments = "^2.18.0"
+python-decouple = "^3.8"    # TODO почитать за decouple
 
 
 [build-system]
