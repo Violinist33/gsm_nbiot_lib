@@ -1,7 +1,7 @@
 # SIM7020 Py Integration
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)
+![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![Poetry](https://img.shields.io/badge/poetry-1.2.0-blue.svg)
 
 ## Опис
@@ -20,7 +20,7 @@
 
 ### Вимоги
 
-- Python версії 3.11 або вище
+- [Python](https://www.python.org/) версії 3.12 або вище
 - [Poetry](https://python-poetry.org/) для керування залежностями
 
 ### Кроки встановлення
@@ -28,8 +28,8 @@
 1. **Клонуйте репозиторій:**
 
    ```bash
-   git clone https://github.com/ваш_репозиторій/sim7020py-integration.git
-   cd sim7020py-integration
+   git clone git@github.com:Violinist33/sim7020library.git
+   cd sim7020pylibrary
    ```
 
 2. **Встановіть залежності за допомогою Poetry:**
@@ -60,7 +60,7 @@ poetry run python example.py
 
 ## Конфігурація
 
-Основні параметри конфігурації знаходяться в `example.py` та можуть бути налаштовані під ваші потреби:
+Основні параметри конфігурації знаходяться в `config.py` та можуть бути налаштовані під ваші потреби:
 
 - **Апаратні Піни**: Налаштування пінів для світлодіодів та керування живленням.
 - **Мережеві Параметри**: APN, токени Blynk та інші параметри мережі.
@@ -68,7 +68,7 @@ poetry run python example.py
 
 ## Внесок
 
-Будемо раді вашим пропозиціям та покращенням! Будь ласка, створюйте [issues](https://github.com/ваш_репозиторій/sim7020py-integration/issues) для звітів про помилки або пропозицій, а також надсилайте [pull requests](https://github.com/ваш_репозиторій/sim7020py-integration/pulls) з покращеннями.
+Будемо раді вашим пропозиціям та покращенням! Будь ласка, створюйте [issues](https://github.com/Violinist33/sim7020library/issues) для звітів про помилки або пропозицій, а також надсилайте [pull requests](https://github.com/Violinist33/sim7020library/pulls) з покращеннями.
 
 ## Ліцензія
 
@@ -76,7 +76,7 @@ poetry run python example.py
 
 ## Додатково
 
-Для детальнішої документації та інформації відвідайте [Wiki](https://github.com/ваш_репозиторій/sim7020py-integration/wiki) або ознайомтеся з документацією у репозиторії.
+Для детальнішої документації та інформації відвідайте [Wiki](https://jumbled-hose.surge.sh) або ознайомтеся з документацією у репозиторії.
 
 ---
 © 2024 Antonii Lupandin
