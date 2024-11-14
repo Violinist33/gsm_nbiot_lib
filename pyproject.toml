@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sim7020py"
-version = "0.2.1"
+version = "0.3.0"
 description = ""
 authors = ["Antonii Lupandin"]
 readme = "README.md"
@@ -16,6 +16,10 @@ ruff = "^0.7.1"
 loguru = "^0.7.2"
 pygments = "^2.18.0"
 python-decouple = "^3.8"    # TODO почитать за decouple
+uflash = "^2.0.0"
+docopt = "^0.6.2"
+pyserial = "^3.5"
+adafruit-ampy = "1.0.7"
 
 
 [tool.poetry.group.dev.dependencies]
