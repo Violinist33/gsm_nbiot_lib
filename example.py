@@ -6,30 +6,23 @@ from sim7020py.utils import save_state, load_state, parse_response
 import utime
 from machine import Pin, deepsleep, lightsleep
 
+from config import *
+
 # Hardware configuration
-led_pin = 25  # onboard led
+LED_PIN = 25  # onboard led
 led_pin_main = 2  # external led
 pwr_en = 14  # power control pin for SIM7020
 uart_port = 0
 uart_baudrate = 115200
 
-# Network configuration
-APN = "nbiot"
-blynk_token = "sMfdQBzIf8kefrrXmMZH-b6bgsUSwxvT"
-
-# Device configuration
-Broker_Address = "blynk.cloud"
-DeviceName = "Vertexyz"
-DeviceSecret = "J45_VVZsA5w6uw5MI4X095f37GpZAJ0N"
-
 # Initialize device and setup pins
-led_onboard = Pin(led_pin, Pin.OUT)
+led_onboard = Pin(LED_PIN, Pin.OUT)
 led_main = Pin(led_pin_main, Pin.OUT)
 pwr_key = Pin(pwr_en, Pin.OUT)
 
 # Instantiate SIM7020 and Blynk classes
 sim7020 = SIM7020(port=uart_port, baudrate=uart_baudrate)
-blynk = BlynkIntegration(port=uart_port, apn=APN, blynk_token=blynk_token)
+blynk = BlynkIntegration(port=uart_port, apn=APN, blynk_token=BLYNK_TOKEN)
 
 
 # Power control functions
@@ -81,8 +74,8 @@ def send_and_process(cmd):
 # MQTT connection setup
 def mqtt_connect():
     send_and_process("AT+CSQ")  # Check signal strength
-    send_and_process(f"AT+CMQNEW=\"{Broker_Address}\",\"1883\",12000,1024")
-    send_and_process(f"AT+CMQCON=0,3,\"{DeviceName}\",45,1,0,\"device\",\"{DeviceSecret}\"")
+    send_and_process(f"AT+CMQNEW=\"{BROKER_ADDRESS}\",\"1883\",12000,1024")
+    send_and_process(f"AT+CMQCON=0,3,\"{DEVICE_NAME}\",45,1,0,\"device\",\"{DEVICE_SECRET}\"")
 
 
 # State management
