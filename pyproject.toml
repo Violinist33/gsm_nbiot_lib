@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "sim7020py"
-version = "0.1.0"
+version = "0.1.1"
 description = ""
-authors = "Antonii Lupandin"
+authors = ["Antonii Lupandin"]
 readme = "README.md"
+packages = [{ include = "sim7020py" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.12,<3.13"
 asttokens = "^2.4.1"
 executing = "^2.1.0"
 colorama = "^0.4.6"
