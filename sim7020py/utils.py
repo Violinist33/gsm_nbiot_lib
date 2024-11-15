@@ -1,12 +1,11 @@
-import logging
 import time
 import json
-from typing import Callable, Any
 
-logging.basicConfig(level=logging.INFO)
+def log(level, message):
+    """Simple logging function for MicroPython."""
+    print(f"[{level}] {message}")
 
-
-def save_state(filename: str, variable: Any, mode: str = 'w') -> None:
+def save_state(filename, variable, mode='w'):
     """
     Saves the value of a variable to a file.
 
@@ -18,8 +17,7 @@ def save_state(filename: str, variable: Any, mode: str = 'w') -> None:
     with open(filename, mode) as f:
         f.write(str(variable))
 
-
-def load_state(filename: str) -> str | int:
+def load_state(filename):
     """
     Reads a variable's value from a file.
 
@@ -31,14 +29,13 @@ def load_state(filename: str) -> str | int:
     """
     try:
         with open(filename, 'r') as f:
-            content: str = f.read()
+            content = f.read()
             return content
     except OSError:
         save_state(filename, 0)
         return 0
 
-
-def parse_response(response: str) -> tuple[str, list[str]]:
+def parse_response(response):
     """
     Parses the response from AT command strings.
 
@@ -46,28 +43,27 @@ def parse_response(response: str) -> tuple[str, list[str]]:
         response (str): The raw response string from an AT command.
 
     Returns:
-        tuple[str, list[str]]: A tuple containing the command name and a list of parameters.
+        tuple: A tuple containing the command name and a list of parameters.
     """
     response = response.strip('\r\n')
-    lines: list[str] = response.split('\r\n')
-    parts: list[str] = lines[0].split(': ')
-    command_name: str = parts[0].strip(' ')
-    parameters: list[str] = [""]
+    lines = response.split('\r\n')
+    parts = lines[0].split(': ')
+    command_name = parts[0].strip(' ')
+    parameters = [""]
     if len(parts) > 1:
         parts[1] = parts[1].strip('\r\n')
         parameters = parts[1].split(',')
     return command_name, parameters
 
-
-def parse_signal_quality(response: list[str]) -> tuple[int, int] | None:
+def parse_signal_quality(response):
     """
     Parses the response from the AT+CSQ command to retrieve signal quality.
 
     Args:
-        response (list[str]): The response from the AT+CSQ command.
+        response (list): The response from the AT+CSQ command.
 
     Returns:
-        tuple[int, int] | None: Tuple (RSSI, BER) if successful, or None if parsing fails.
+        tuple | None: Tuple (RSSI, BER) if successful, or None if parsing fails.
     """
     try:
         for line in response:
@@ -76,17 +72,16 @@ def parse_signal_quality(response: list[str]) -> tuple[int, int] | None:
                 rssi, ber = map(int, signal_info.split(","))
                 return rssi, ber
     except (ValueError, IndexError) as e:
-        logging.error(f"Error parsing signal quality: {e}")
+        log("ERROR", f"Error parsing signal quality: {e}")
 
     return None
 
-
-def validate_response(response: list[str], expected_keyword: str = "OK") -> bool:
+def validate_response(response, expected_keyword="OK"):
     """
     Checks if the response contains an expected keyword, typically to confirm a command succeeded.
 
     Args:
-        response (list[str]): The response received from the module.
+        response (list): The response received from the module.
         expected_keyword (str): The keyword expected in the response. Defaults to "OK".
 
     Returns:
@@ -95,34 +90,32 @@ def validate_response(response: list[str], expected_keyword: str = "OK") -> bool
     if any(expected_keyword in line for line in response):
         return True
     else:
-        logging.warning(f"Expected keyword '{expected_keyword}' not found in response: {response}")
+        log("WARNING", f"Expected keyword '{expected_keyword}' not found in response: {response}")
         return False
 
-
-def parse_http_response(response: list[str]) -> str | None:
+def parse_http_response(response):
     """
     Parses the HTTP response from Blynk or other servers, returning useful data.
 
     Args:
-        response (list[str]): The HTTP response from the AT+HTTPGET or AT+HTTPPOST command.
+        response (list): The HTTP response from the AT+HTTPGET or AT+HTTPPOST command.
 
     Returns:
         str | None: Useful data from the response, or None if parsing fails.
     """
     try:
-        data: str = response[-1].strip()
+        data = response[-1].strip()
         return data
     except IndexError as e:
-        logging.error(f"Error parsing HTTP response: {e}")
+        log("ERROR", f"Error parsing HTTP response: {e}")
         return None
 
-
-def retry_operation(operation: Callable[[], Any], max_retries: int = 3, delay: int = 1) -> Any | None:
+def retry_operation(operation, max_retries=3, delay=1):
     """
     Retries an operation several times in case of failure.
 
     Args:
-        operation (Callable[[], Any]): A function or lambda expression to execute.
+        operation (Callable): A function or lambda expression to execute.
         max_retries (int): The maximum number of retry attempts. Defaults to 3.
         delay (int): Delay between attempts (in seconds). Defaults to 1.
 
@@ -131,23 +124,22 @@ def retry_operation(operation: Callable[[], Any], max_retries: int = 3, delay: i
     """
     for attempt in range(max_retries):
         try:
-            result: Any = operation()
+            result = operation()
             return result
         except Exception as e:
-            logging.warning(f"Attempt {attempt + 1} failed: {e}")
+            log("WARNING", f"Attempt {attempt + 1} failed: {e}")
             if attempt < max_retries - 1:
                 time.sleep(delay)
-    logging.error("Operation failed after all retry attempts")
+    log("ERROR", "Operation failed after all retry attempts")
     return None
 
-
-def format_at_command(command: str, params: list[str] | None = None) -> str:
+def format_at_command(command, params=None):
     """
     Formats an AT command with optional parameters.
 
     Args:
         command (str): The base AT command (e.g., "AT+CSQ").
-        params (list[str] | None): Parameters to append to the command.
+        params (list | None): Parameters to append to the command.
 
     Returns:
         str: Formatted AT command string.
@@ -156,43 +148,41 @@ def format_at_command(command: str, params: list[str] | None = None) -> str:
         return f"{command}={','.join(map(str, params))}"
     return command
 
-
-def handle_timeout(operation: Callable[[], Any], timeout: int = 5) -> Any | None:
+def handle_timeout(operation, timeout=5):
     """
     Executes an operation with a specified timeout.
 
     Args:
-        operation (Callable[[], Any]): Function to execute.
+        operation (Callable): Function to execute.
         timeout (int): Time limit for the operation (in seconds). Defaults to 5.
 
     Returns:
         Any | None: Result of the operation if successful within timeout, or None if timeout occurs.
     """
-    start_time: float = time.time()
+    start_time = time.time()
     while time.time() - start_time < timeout:
         try:
-            result: Any = operation()
+            result = operation()
             return result
         except Exception as e:
-            logging.warning(f"Operation failed, retrying within timeout: {e}")
+            log("WARNING", f"Operation failed, retrying within timeout: {e}")
             time.sleep(0.5)
-    logging.error("Operation timed out")
+    log("ERROR", "Operation timed out")
     return None
 
-
-def extract_json_data(response: list[str]) -> dict | None:
+def extract_json_data(response):
     """
     Attempts to extract JSON-formatted data from an HTTP response string.
 
     Args:
-        response (list[str]): The HTTP response from the module.
+        response (list): The HTTP response from the module.
 
     Returns:
         dict | None: Parsed JSON data as a dictionary, or None if extraction fails.
     """
     try:
-        data: dict = json.loads(response[-1])  # Assuming JSON is in the last line
+        data = json.loads(response[-1])  # Assuming JSON is in the last line
         return data
     except (json.JSONDecodeError, IndexError) as e:
-        logging.error(f"Error parsing JSON data: {e}")
+        log("ERROR", f"Error parsing JSON data: {e}")
         return None

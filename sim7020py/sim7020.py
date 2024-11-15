@@ -1,20 +1,21 @@
 from .commands import ATCommand, ATCommandError
+from machine import UART
 
 
 class SIM7020:
     """Class for controlling the SIM7020 module using AT commands."""
 
-    def __init__(self, port: str, baudrate: int = 9600, timeout: int = 1):
+    def __init__(self, uart: UART, baudrate: int = 9600, timeout: int = 1):
         """
-        Initializes the SIM7020 with the specified port and UART parameters.
+        Initializes the SIM7020 with the specified UART and parameters.
 
         Args:
-            port (str): UART port (e.g., "/dev/ttyUSB0" for Linux).
+            uart (UART): UART instance for communication.
             baudrate (int, optional): Data transmission rate. Defaults to 9600.
             timeout (int, optional): Response timeout. Defaults to 1.
         """
-        # Initializes ATCommand instance to manage commands with specified port, baudrate, and timeout
-        self.at_command: ATCommand = ATCommand(port, baudrate, timeout)
+        # Инициализирует ATCommand с переданным UART объектом
+        self.at_command: ATCommand = ATCommand(uart, baudrate, timeout)
 
     def initialize(self) -> None:
         """
@@ -23,7 +24,7 @@ class SIM7020:
         Raises:
             ATCommandError: If connection to the SIM7020 module cannot be established.
         """
-        # Checks connection status and raises ATCommandError if connection fails
+        # Проверяет статус соединения и вызывает исключение, если соединение не установлено
         if not self.at_command.check_connection():
             raise ATCommandError("Failed to establish connection with SIM7020 module")
 
@@ -36,7 +37,7 @@ class SIM7020:
         Args:
             apn (str): APN name for the network.
         """
-        # Sends APN configuration command
+        # Отправляет команду для установки APN
         self.at_command.set_apn(apn)
         print(f"APN '{apn}' successfully set")
 
@@ -44,7 +45,7 @@ class SIM7020:
         """
         Connects the module to the NB-IoT network.
         """
-        # Sends network connection command
+        # Отправляет команду для подключения к сети
         self.at_command.connect_network()
         print("Network connection established")
 
@@ -52,7 +53,7 @@ class SIM7020:
         """
         Disconnects the module from the NB-IoT network.
         """
-        # Sends network disconnection command
+        # Отправляет команду для отключения от сети
         self.at_command.disconnect_network()
         print("Network disconnection completed")
 
@@ -63,9 +64,9 @@ class SIM7020:
         Returns:
             tuple[int, int]: RSSI (Received Signal Strength Indicator) and BER (Bit Error Rate).
         """
-        # Retrieves RSSI and BER values from the module
-        rssi: int  # Received Signal Strength Indicator
-        ber: int  # Bit Error Rate
+        # Получает значения RSSI и BER
+        rssi: int
+        ber: int
         rssi, ber = self.at_command.get_signal_quality()
         print(f"Signal quality: RSSI={rssi}, BER={ber}")
         return rssi, ber
@@ -81,7 +82,7 @@ class SIM7020:
             ATCommandError: If an error occurs during data transmission.
         """
         try:
-            # Sends data transmission command with specified data
+            # Отправляет команду для передачи данных
             self.at_command.send_command(f'AT+SEND={data}', expected_response="SEND OK")
             print("Data successfully sent")
         except ATCommandError:
@@ -91,6 +92,6 @@ class SIM7020:
         """
         Terminates usage of the module and closes the UART connection.
         """
-        # Closes the AT command interface and ends the connection
+        # Закрывает интерфейс AT команд и завершает соединение
         self.at_command.close()
         print("Connection with the module closed")
