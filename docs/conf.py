@@ -34,3 +34,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 html_theme = 'alabaster'
 html_static_path = ['_static']
+
+# -- Mocking imports for modules not available in the build environment
+autodoc_mock_imports = [
+    'machine',
+    'utime',
+    'network',
+    'json',
+    # Добавьте другие модули по необходимости
+]
