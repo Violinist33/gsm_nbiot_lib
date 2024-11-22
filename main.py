@@ -1,125 +1,94 @@
 # main.py
-from sim7020py import SIM7020, BlynkIntegration, save_state, load_state, ATCommandError
+
+from gsm_nbiot_lib.modules.sim7020 import SIM7020
+from gsm_nbiot_lib.integrations.mqtt import MQTTClient
+from gsm_nbiot_lib.utils.helpers import led_blink
+from machine import Pin, lightsleep, freq
 import utime
-import binascii
-from machine import Pin, UART, deepsleep, lightsleep
 
-from config import *
+print("Frequency: ", freq())
 
-# Инициализация светодиодов и пина управления питанием
-led_onboard = Pin(LED_PIN, Pin.OUT)
-led_main = Pin(LED_PIN_MAIN, Pin.OUT)
-pwr_en = Pin(PWR_EN, Pin.OUT)
+# Налаштування
+APN = "nbiot"
+Broker_Address = "blynk.cloud"
+Port = "1883"
+ClientID = "Client_1"
+DeviceSecret = "J45_VVZsA5w6uw5MI4X095f37GpZAJ0N"
 
-# Инициализация UART
-if UART_PORT == 0:
-    uart_tx = Pin(0)
-    uart_rx = Pin(1)
-elif UART_PORT == 1:
-    uart_tx = Pin(4)
-    uart_rx = Pin(5)
-else:
-    raise ValueError("Неверный UART_PORT. Используйте 0 для UART0 или 1 для UART1.")
+# Піни
+LED_ONBOARD_PIN = 25
+LED_MAIN_PIN = 2
+PWR_EN_PIN = 14
+UART_PORT = 0
+UART_BAUDRATE = 115200
 
-uart = UART(UART_PORT, baudrate=UART_BAUDRATE, tx=uart_tx, rx=uart_rx, timeout=5000)
-print(uart)
+# Ініціалізація світлодіодів
+led_onboard = Pin(LED_ONBOARD_PIN, Pin.OUT)
+led_main = Pin(LED_MAIN_PIN, Pin.OUT)
 
-# Создание экземпляров SIM7020 и BlynkIntegration
-sim7020 = SIM7020(uart=uart, baudrate=UART_BAUDRATE, timeout=5)
-blynk = BlynkIntegration(uart=uart, apn=APN, blynk_token=BLYNK_TOKEN, baudrate=UART_BAUDRATE, timeout=5)
+# Ініціалізація модуля SIM7020
+sim7020 = SIM7020(UART_PORT, UART_BAUDRATE, APN, PWR_EN_PIN)
 
-# Функции управления питанием SIM7020
-def power_on():
-    pwr_en.value(1)
-    utime.sleep(2)  # Ожидание полной инициализации модуля
 
-def power_off():
-    pwr_en.value(0)
-    utime.sleep(1)  # Ожидание отключения питания
+# Включення живлення
+sim7020.power_on(PWR_EN_PIN)
+utime.sleep(2)
 
-# Функция мигания светодиодом
-def led_blink(num_blinks=4, time_between=0.5):
-    """Мигает встроенным светодиодом заданное количество раз."""
-    print("Мигаем светодиодом...")
-    prev = led_onboard.value()
-    for _ in range(num_blinks):
-        led_onboard.value(1)
-        utime.sleep(time_between)
-        led_onboard.value(0)
-        utime.sleep(time_between)
-    led_onboard.value(prev)
+# Конфігурація APN
+sim7020.configure_apn()
 
-# Функция инициализации подключения к сети и Blynk
-def initialize_connection():
-    power_on()
-    try:
-        blynk.connect()
-        print("Инициализация подключения выполнена успешно")
-    except ATCommandError as e:
-        print(f"Ошибка при инициализации подключения: {e}")
+# Перевірка якості сигналу
+sim7020.check_signal_quality()
+print(f"Signal Quality: {sim7020.signal_quality}")
 
-# Функция переключения состояния лампы
-def toggle_lamp_state(state_file='state.db'):
-    current_state = load_state(state_file)
-    lamp_is_on = int(current_state) if current_state else 1
-    led_main.value(lamp_is_on)
-    led_onboard.value(not lamp_is_on)
-    return lamp_is_on
+# Ініціалізація MQTT клієнта
+mqtt_client = MQTTClient(
+    sim7020.at,
+    Broker_Address,
+    Port,
+    ClientID,
+    DeviceSecret
+)
 
-# Функция перехода в режим сна
-def sleep_fn(time_minutes):
-    # Отключение питания SIM7020
-    power_off()
-    print("Переход в режим сна...")
-    utime.sleep(2)
-    deepsleep(time_minutes * 60000)  # Глубокий сон на заданное количество минут
+# Підключення до MQTT
+mqtt_client.connect()
 
-# Основная функция программы
-def main():
-    # Загрузка состояния лампы из файла
-    lamp_is_on = toggle_lamp_state()
+# Підписка на топік
+mqtt_client.subscribe("downlink/ds/Integer V0")
 
-    # Установка начального состояния светодиодов
-    led_blink(5)
 
-    # Инициализация подключения к сети и Blynk
-    initialize_connection()
+# Функція для обробки отриманих повідомлень
+def handle_messages():
+    # Тут потрібно реалізувати обробку повідомлень від MQTT
+    pass
 
-    # Подключение к MQTT брокеру
-    sim7020.mqtt_new(broker_address=BROKER_ADDRESS, port=1883, keepalive=12000, buffer_size=1024)
-    sim7020.mqtt_connect(client_id=DEVICE_NAME, clean_session=1, keepalive=12000, username="device", password=DEVICE_SECRET)
 
-    # Подписка на топик для управления лампой
-    sim7020.mqtt_subscribe("downlink/ds/Integer V0")
+# Основний цикл
+while True:
+    print("Main loop working...")
 
-    while True:
-        print("Работаем...")
-        # Запрос значения виртуального пина от Blynk
-        value = blynk.get_value(0)  # Получение значения из Blynk
-        if value is not None:
-            print(f"Получено значение от Blynk: {value}")
-            # Здесь можно добавить логику обработки полученного значения
+    # Запит значення піна
+    mqtt_client.publish("get/ds", "Integer V0")
 
-        # Переключение состояния светодиодов на основе состояния лампы
-        lamp_is_on = not lamp_is_on
-        save_state('state.db', lamp_is_on)
-        led_main.value(lamp_is_on)
-        led_onboard.value(not lamp_is_on)
-        print(f"Лампа {'Включена' if lamp_is_on else 'Выключена'}")
+    # Обробка відповіді
+    handle_messages()
 
-        # Отправка MQTT сообщения о состоянии лампы
-        sim7020.mqtt_publish("ds/LampStatus", str(lamp_is_on))
+    # Блимання світлодіодами
+    led_blink(led_onboard, 4, 0.5)
 
-        # Переход в режим низкого энергопотребления
-        print("Переход в режим светового сна...")
-        led_blink(4, 0.5)
-        lightsleep(10000)  # Световой сон на 10 секунд
-        led_blink(10, 0.05)
+    # Режим світлового сну
+    lightsleep(10000)
 
-    # Отключение от MQTT брокера и переход в глубокий сон
-    sim7020.mqtt_disconnect()
-    print("Устройство переходит в глубокий сон на 15 минут...")
-    sleep_fn(15)
+    # Блимання швидкими імпульсами
+    led_blink(led_onboard,10, 0.05)
 
-if __name__ == "__main__":
-    main()
+    # # Затримка перед наступною ітерацією
+    # utime.sleep(3)
+
+    # При необхідності можна додати умови для виходу з циклу та інших дій
+
+# роз'єднання
+sendCMD_waitRespLine("AT+CMQDISCON=0", 1, False)  # disconnect MQTT connection
+
+# сон на 15 хв
+sleep_fn(15)

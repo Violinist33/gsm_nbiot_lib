@@ -38,6 +38,7 @@ class BlynkIntegration:
             self.sim7020.set_apn(self.apn)
             self.sim7020.connect_network()
             self.connected = True
+            print("Connected to network and Blynk successfully")
             self.log("INFO", "Connected to network and Blynk")
         except Exception as e:
             self.log("ERROR", f"Connection error: {e}")
