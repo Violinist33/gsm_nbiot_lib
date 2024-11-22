@@ -1,6 +1,5 @@
 import os
 
-
 def load_config(filename=".env"):
     """
     Загружает переменные конфигурации из файла.
@@ -23,7 +22,6 @@ def load_config(filename=".env"):
         print(f"Ошибка загрузки конфигурационного файла: {e}")
     return config
 
-
 # Загрузка конфигурации
 env = load_config()
 
@@ -31,8 +29,8 @@ env = load_config()
 APN = env.get("APN", "nbiot")
 BLYNK_TOKEN = env.get("BLYNK_TOKEN", "")
 BROKER_ADDRESS = env.get("BROKER_ADDRESS", "blynk.cloud")
-DEVICE_NAME = env.get("DEVICE_NAME", "")
-DEVICE_SECRET = env.get("DEVICE_SECRET", "")
+DEVICE_NAME = env.get("DEVICE_NAME", "Vertexyz")
+DEVICE_SECRET = env.get("DEVICE_SECRET", "J45_VVZsA5w6uw5MI4X095f37GpZAJ0N")
 
 # Аппаратная конфигурация
 LED_PIN = 25  # Встроенный светодиод
