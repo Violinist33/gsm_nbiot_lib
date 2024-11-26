@@ -1,8 +1,6 @@
-# main.py
+from gsm_nbiot_lib import SIM7020, MQTTClient, led_blink
+from gsm_nbiot_lib.SIM7020 import sim7020
 
-from gsm_nbiot_lib.modules.sim7020 import SIM7020
-from gsm_nbiot_lib.integrations.mqtt import MQTTClient
-from gsm_nbiot_lib.utils.helpers import led_blink
 from machine import Pin, lightsleep, freq
 import utime
 
