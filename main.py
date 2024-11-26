@@ -1,6 +1,5 @@
-from gsm_nbiot_lib import SIM7020, MQTTClient, led_blink
-from gsm_nbiot_lib.SIM7020 import sim7020
-
+from gsm_nbiot_lib import SIM7020, MQTTClient, led_blink, handle_mqtt_publish
+# from gsm_nbiot_lib.core.command_parser import handle_mqtt_publish
 from machine import Pin, lightsleep, freq
 import utime
 
@@ -53,22 +52,15 @@ mqtt_client.connect()
 # Підписка на топік
 mqtt_client.subscribe("downlink/ds/Integer V0")
 
-
-# Функція для обробки отриманих повідомлень
-def handle_messages():
-    # Тут потрібно реалізувати обробку повідомлень від MQTT
-    pass
-
-
 # Основний цикл
 while True:
     print("Main loop working...")
 
     # Запит значення піна
-    mqtt_client.publish("get/ds", "Integer V0")
+    name_cmd, response = mqtt_client.publish("get/ds", "Integer V0")
 
     # Обробка відповіді
-    handle_messages()
+    handle_mqtt_publish(led_main, led_onboard, response)
 
     # Блимання світлодіодами
     led_blink(led_onboard, 4, 0.5)
@@ -77,15 +69,15 @@ while True:
     lightsleep(10000)
 
     # Блимання швидкими імпульсами
-    led_blink(led_onboard,10, 0.05)
+    led_blink(led_onboard, 10, 0.05)
 
     # # Затримка перед наступною ітерацією
     # utime.sleep(3)
 
     # При необхідності можна додати умови для виходу з циклу та інших дій
 
-# роз'єднання
-sendCMD_waitRespLine("AT+CMQDISCON=0", 1, False)  # disconnect MQTT connection
-
-# сон на 15 хв
-sleep_fn(15)
+# except KeyboardInterrupt:
+#     # Роз'єднання при завершенні
+#     # mqtt_client.disconnect()  # Використовуйте метод disconnect замість sendCMD_waitRespLine
+#     # Сон на 15 хв
+#     # sleep_fn(15)

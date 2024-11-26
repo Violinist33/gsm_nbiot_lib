@@ -11,6 +11,8 @@ Example Usage:
     info_cmd("+CSQ", ["15", "99"])
 """
 
+
+
 def info_cmd(command_name, parameters):
     """
     Logs and displays information about an AT command response.
@@ -33,7 +35,11 @@ def info_cmd(command_name, parameters):
         Output:
             Error occurred while executing the command
     """
+
+    if parameters:
+        print("Command name:", command_name)
+        print("Parameters:", parameters, "\n")
+
     if command_name == "ERROR":
         print("Error occurred while executing the command")
-    print("Command name:", command_name)
-    print("Parameters:", parameters, "\n")
+

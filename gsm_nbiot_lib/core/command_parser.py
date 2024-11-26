@@ -17,6 +17,7 @@ Example Usage:
     command_name, parameters = parse_response(response)
     handle_command_response(command_name, parameters)
 """
+from gsm_nbiot_lib.utils import hexStr_to_str, save_state
 
 
 def parse_response(response):
@@ -51,7 +52,7 @@ def handle_command_response(command_name, parameters):
     if command_name == "+CSQ":
         handle_signal_quality(parameters)
     elif command_name == "+CMQPUB":
-        pass  # Reserved for future MQTT publish handling.
+        pass
 
 
 def handle_signal_quality(parameters):
@@ -65,16 +66,16 @@ def handle_signal_quality(parameters):
     signal_quality = parameters[0]
     print("Signal Quality:", signal_quality)
 
-# def handle_mqtt_publish(parameters):
-#     """
-#     Handles the +CMQPUB (MQTT Publish) command.
-#
-#     Args:
-#         parameters (list): Parameters of the +CMQPUB command.
-#     """
-#     lampIsOn = int(hexStr_to_str(parameters[-1].strip('"')))
-#     lampIsOn = 1 if lampIsOn == 0 else 0
-#     save_state('state.db', lampIsOn)
-#     led_onboard.value(not lampIsOn)
-#     led_main.value(lampIsOn)
-#     print("Lamp state:", not lampIsOn)
+def handle_mqtt_publish(led_main, led_onboard, parameters):
+    """
+    Handles the +CMQPUB (MQTT Publish) command.
+
+    Args:
+        parameters (list): Parameters of the +CMQPUB command.
+    """
+    lampIsOn = int(hexStr_to_str(parameters[-1].strip('"')))
+    lampIsOn = 1 if lampIsOn == 0 else 0
+    save_state('state.db', lampIsOn)
+    led_onboard.value(not lampIsOn)
+    led_main.value(lampIsOn)
+    print("Lamp state:", not lampIsOn)

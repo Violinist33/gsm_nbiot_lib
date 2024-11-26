@@ -40,9 +40,9 @@ UART_PORT = 0  # Выбор UART0 (используйте 1 для UART1)
 UART_BAUDRATE = 115200  # Скорость передачи данных
 
 # Отладочный вывод загруженной конфигурации
-print("Configuration Loaded:")
-print(f"APN: {APN}")
-print(f"BLYNK_TOKEN: {BLYNK_TOKEN}")
-print(f"BROKER_ADDRESS: {BROKER_ADDRESS}")
-print(f"DEVICE_NAME: {DEVICE_NAME}")
-print(f"DEVICE_SECRET: {DEVICE_SECRET}")
+# print("Configuration Loaded:")
+# print(f"APN: {APN}")
+# print(f"BLYNK_TOKEN: {BLYNK_TOKEN}")
+# print(f"BROKER_ADDRESS: {BROKER_ADDRESS}")
+# print(f"DEVICE_NAME: {DEVICE_NAME}")
+# print(f"DEVICE_SECRET: {DEVICE_SECRET}")

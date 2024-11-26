@@ -27,10 +27,11 @@ Imports:
 
 import utime
 from machine import UART
-from gsm_nbiot_lib.core.command_parser import parse_response
-from gsm_nbiot_lib.core.errors import ATCommandError
-from gsm_nbiot_lib.utils.helpers import sleep_fn
-from gsm_nbiot_lib.models.command import info_cmd
+from .command_parser import parse_response
+from .errors import ATCommandError
+from ..utils.helpers import sleep_fn
+from ..models.command import info_cmd
+
 
 
 class ATCommandInterface:
@@ -91,11 +92,10 @@ class ATCommandInterface:
             raise ATCommandError(f"Command '{cmd}' failed with response: {response}")
 
         command_name, parameters = parse_response(response)
-        if parameters:
-            info_cmd(command_name, parameters)
+        info_cmd(command_name, parameters)
         return command_name, parameters
 
-    def wait_response_line(self, timeout=5000):
+    def wait_response_line(self):
         """
         Waits for a response from the device via UART.
 
@@ -113,9 +113,9 @@ class ATCommandInterface:
         """
         response = ""
         start_time = utime.ticks_ms()
-        while (utime.ticks_ms() - start_time) < timeout:
+        while (utime.ticks_ms() - start_time) < self.timeout:
             if self.uart.any():
-                char = self.uart.read(1).decode(errors='ignore')
+                char = self.uart.read(1).decode()
                 response += char
                 if response.endswith("OK\r\n") or response.endswith("ERROR\r\n") or response.endswith("TIMEOUT\r\n"):
                     break

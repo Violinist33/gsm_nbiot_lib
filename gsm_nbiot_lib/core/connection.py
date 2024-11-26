@@ -20,9 +20,10 @@ Example Usage:
     connection_manager.check_signal_quality()
 """
 
-from gsm_nbiot_lib.core.at_command import ATCommandInterface
-from gsm_nbiot_lib.core.errors import ConnectionError
+from .at_command import ATCommandInterface
+from .errors import ConnectionError
 from machine import Pin
+
 
 class ConnectionManager:
     """
@@ -103,4 +104,4 @@ class ConnectionManager:
         """
         cmd, params = self.at.send_command("AT+CSQ")
         if cmd == "+CSQ" and params:
-            self.signal_quality = int(params[0])
+            self.signal_quality = int(params)

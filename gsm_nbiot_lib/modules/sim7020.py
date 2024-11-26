@@ -20,9 +20,10 @@ Example Usage:
     sim.toggle_lamp()
 """
 
-from gsm_nbiot_lib.core.connection import ConnectionManager
-from gsm_nbiot_lib.core.at_command import ATCommandInterface
-from gsm_nbiot_lib.utils.helpers import save_state, load_state
+from ..core.connection import ConnectionManager
+from ..core.at_command import ATCommandInterface
+from ..utils.helpers import save_state, load_state
+
 
 class SIM7020(ConnectionManager):
     """
