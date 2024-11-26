@@ -29,20 +29,14 @@ env = load_config()
 APN = env.get("APN", "nbiot")
 BLYNK_TOKEN = env.get("BLYNK_TOKEN", "")
 BROKER_ADDRESS = env.get("BROKER_ADDRESS", "blynk.cloud")
+PORT = "1883"
+CLIENTID = "Client_1"
 DEVICE_NAME = env.get("DEVICE_NAME", "Vertexyz")
 DEVICE_SECRET = env.get("DEVICE_SECRET", "J45_VVZsA5w6uw5MI4X095f37GpZAJ0N")
 
 # Аппаратная конфигурация
-LED_PIN = 25  # Встроенный светодиод
-LED_PIN_MAIN = 2  # Внешний светодиод
-PWR_EN = 14  # Пин для управления питанием SIM7020
+LED_ONBOARD_PIN = 25  # Встроенный светодиод
+LED_MAIN_PIN = 2  # Внешний светодиод
+PWR_EN_PIN = 14  # Пин для управления питанием SIM7020
 UART_PORT = 0  # Выбор UART0 (используйте 1 для UART1)
 UART_BAUDRATE = 115200  # Скорость передачи данных
-
-# Отладочный вывод загруженной конфигурации
-print("Configuration Loaded:")
-print(f"APN: {APN}")
-print(f"BLYNK_TOKEN: {BLYNK_TOKEN}")
-print(f"BROKER_ADDRESS: {BROKER_ADDRESS}")
-print(f"DEVICE_NAME: {DEVICE_NAME}")
-print(f"DEVICE_SECRET: {DEVICE_SECRET}")

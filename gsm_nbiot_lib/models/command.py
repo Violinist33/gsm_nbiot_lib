@@ -1,17 +1,4 @@
-"""
-Module for handling and logging AT command responses.
-
-This module provides a utility function to log and display information about
-AT command responses, including the command name and its parameters.
-
-Functions:
-    - info_cmd(command_name, parameters): Logs and displays information about the command.
-
-Example Usage:
-    info_cmd("+CSQ", ["15", "99"])
-"""
-
-
+# gsm_nbiot_lib/models/command.py
 
 def info_cmd(command_name, parameters):
     """
@@ -43,3 +30,43 @@ def info_cmd(command_name, parameters):
     if command_name == "ERROR":
         print("Error occurred while executing the command")
 
+
+def log_command_execution(command, status):
+    """
+    Logs the execution status of a command.
+
+    Args:
+        command (str): The AT command that was executed.
+        status (str): The status of the command execution (e.g., "Success", "Failed").
+
+    Behavior:
+        - Logs the command and its execution status to the console.
+
+    Example:
+        log_command_execution("AT+CFUN=1", "Success")
+        Output:
+            Command: AT+CFUN=1 executed successfully.
+    """
+    pass
+
+
+def validate_command_response(command, response):
+    """
+    Validates the response received from an executed AT command.
+
+    Args:
+        command (str): The AT command that was executed.
+        response (str): The response received from the device.
+
+    Returns:
+        bool: True if the response is valid and indicates success, False otherwise.
+
+    Behavior:
+        - Checks if the response contains "OK".
+        - Logs appropriate messages based on the response content.
+
+    Example:
+        is_valid = validate_command_response("AT+CSQ", "OK\r\n")
+        # is_valid == True
+    """
+    pass

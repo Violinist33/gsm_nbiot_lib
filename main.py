@@ -2,22 +2,9 @@ from gsm_nbiot_lib import SIM7020, MQTTClient, led_blink, handle_mqtt_publish
 # from gsm_nbiot_lib.core.command_parser import handle_mqtt_publish
 from machine import Pin, lightsleep, freq
 import utime
+from config import *
 
 print("Frequency: ", freq())
-
-# Налаштування
-APN = "nbiot"
-Broker_Address = "blynk.cloud"
-Port = "1883"
-ClientID = "Client_1"
-DeviceSecret = "J45_VVZsA5w6uw5MI4X095f37GpZAJ0N"
-
-# Піни
-LED_ONBOARD_PIN = 25
-LED_MAIN_PIN = 2
-PWR_EN_PIN = 14
-UART_PORT = 0
-UART_BAUDRATE = 115200
 
 # Ініціалізація світлодіодів
 led_onboard = Pin(LED_ONBOARD_PIN, Pin.OUT)
@@ -40,10 +27,10 @@ print(f"Signal Quality: {sim7020.signal_quality}")
 # Ініціалізація MQTT клієнта
 mqtt_client = MQTTClient(
     sim7020.at,
-    Broker_Address,
-    Port,
-    ClientID,
-    DeviceSecret
+    BROKER_ADDRESS,
+    PORT,
+    CLIENTID,
+    DEVICE_SECRET
 )
 
 # Підключення до MQTT
