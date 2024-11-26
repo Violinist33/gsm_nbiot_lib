@@ -1,6 +1,6 @@
 # gsm_nbiot_lib/integrations/mqtt.py
 
-from gsm_nbiot_lib.utils.helpers import str_to_hexStr
+from ..utils import str_to_hexStr
 
 
 class MQTTClient:
@@ -45,13 +45,13 @@ class MQTTClient:
         self.at.send_command(f'AT+CMQNEW="{self.broker_address}","{self.port}",12000,1024')
         self.at.send_command(f'AT+CMQCON=0,3,"{self.client_id}",45,1,0,"device","{self.device_secret}"')
 
-    def disconnect(self):
-        """
-        Відключається від MQTT-брокера.
-
-        Відправляє команду для завершення активного MQTT-з'єднання.
-        """
-        self.at.sendCMD_waitRespLine("AT+CMQDISCON=0", 1, False)
+    # def disconnect(self):
+    #     """
+    #     Відключається від MQTT-брокера.
+    #
+    #     Відправляє команду для завершення активного MQTT-з'єднання.
+    #     """
+    #     self.at.send_command("AT+CMQDISCON=0", 1, False)
 
     def subscribe(self, topic):
         """
@@ -93,5 +93,6 @@ class MQTTClient:
         hex_message = str_to_hexStr(message)
         hex_length = len(hex_message)
         command = f'AT+CMQPUB=0,"{topic}",1,0,0,{hex_length},"{hex_message}"'
-        self.at.send_command(command)
+        return self.at.send_command(command)
+
 
