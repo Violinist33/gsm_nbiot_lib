@@ -1,24 +1,24 @@
 """
-Модуль для взаємодії з AT-командами через UART.
+Module for interacting with AT commands via UART.
 
-Цей модуль надає функціонал для відправки AT-команд до пристрою через UART
-і обробки отриманих відповідей.
+This module provides functionality for sending AT commands to a device through UART
+and handling the received responses.
 
-Класи:
-    - ATCommandInterface: Інтерфейс для відправлення AT-команд і отримання відповідей.
+Classes:
+    - ATCommandInterface: Interface for sending AT commands and receiving responses.
 
-Функції:
-    В межах класу ATCommandInterface:
-        - __init__: Ініціалізує UART-з'єднання.
-        - send_command: Відправляє AT-команду та отримує відповідь.
-        - wait_response_line: Очікує на рядок відповіді з UART.
+Functions:
+    Within the ATCommandInterface class:
+        - __init__: Initializes the UART connection.
+        - send_command: Sends an AT command and retrieves the response.
+        - wait_response_line: Waits for a response line from UART.
 
-Імпорти:
-    - utime: Використовується для роботи з часом.
-    - machine.UART: Для ініціалізації UART-з'єднання.
-    - gsm_nbiot_lib.core.command_parser.parse_response: Для парсингу відповідей.
-    - gsm_nbiot_lib.core.errors.ATCommandError: Виняток для помилок AT-команд.
-    - gsm_nbiot_lib.utils.helpers.sleep_fn: Допоміжна функція для затримки.
+Imports:
+    - utime: Used for time operations.
+    - machine.UART: For initializing the UART connection.
+    - gsm_nbiot_lib.core.command_parser.parse_response: For parsing responses.
+    - gsm_nbiot_lib.core.errors.ATCommandError: Exception for AT command errors.
+    - gsm_nbiot_lib.utils.helpers.sleep_fn: Helper function for delays.
 """
 
 import utime
@@ -31,44 +31,44 @@ from gsm_nbiot_lib.models.command import info_cmd
 
 class ATCommandInterface:
     """
-    Інтерфейс для роботи з AT-командами через UART.
+    Interface for working with AT commands via UART.
 
-    Атрибути:
-        uart (UART): Об'єкт UART для передачі даних.
-        timeout (int): Таймаут очікування відповіді в мілісекундах.
+    Attributes:
+        uart (UART): UART object for data transmission.
+        timeout (int): Timeout for waiting for a response in milliseconds.
 
-    Методи:
-        - __init__(uart_port, baudrate, timeout): Ініціалізує UART.
-        - send_command(cmd, attempts, sleep_on_error): Відправляє команду та отримує відповідь.
-        - wait_response_line(): Очікує на рядок відповіді.
+    Methods:
+        - __init__(uart_port, baudrate, timeout): Initializes the UART connection.
+        - send_command(cmd, attempts, sleep_on_error): Sends a command and retrieves a response.
+        - wait_response_line(): Waits for a response line.
     """
 
     def __init__(self, uart_port=0, baudrate=115200, timeout=5000):
         """
-        Ініціалізація UART-з'єднання.
+        Initializes the UART connection.
 
-        Аргументи:
-            uart_port (int): Номер UART-порту. За замовчуванням 0.
-            baudrate (int): Швидкість передачі даних. За замовчуванням 115200.
-            timeout (int): Таймаут очікування відповіді в мілісекундах. За замовчуванням 5000.
+        Args:
+            uart_port (int): UART port number. Default is 0.
+            baudrate (int): Data transfer rate. Default is 115200.
+            timeout (int): Timeout for waiting for a response in milliseconds. Default is 5000.
         """
         self.uart = UART(uart_port, baudrate=baudrate, bits=8, parity=None, stop=1)
         self.timeout = timeout
 
     def send_command(self, cmd, attempts=5, sleep_on_error=True):
         """
-        Відправляє AT-команду та очікує на відповідь.
+        Sends an AT command and waits for a response.
 
-        Аргументи:
-            cmd (str): AT-команда для відправлення.
-            attempts (int): Кількість спроб у разі невдачі. За замовчуванням 5.
-            sleep_on_error (bool): Затримка перед підняттям винятку. За замовчуванням True.
+        Args:
+            cmd (str): The AT command to send.
+            attempts (int): Number of retry attempts in case of failure. Default is 5.
+            sleep_on_error (bool): Delay before raising an exception. Default is True.
 
-        Повертає:
-            tuple: Назва команди та її параметри.
+        Returns:
+            tuple: Command name and its parameters.
 
-        Піднімає:
-            ATCommandError: Якщо відповідь містить "ERROR" або "TIMEOUT".
+        Raises:
+            ATCommandError: If the response contains "ERROR" or "TIMEOUT".
         """
         response = ""
         for attempt in range(attempts):
@@ -90,13 +90,16 @@ class ATCommandInterface:
 
     def wait_response_line(self, timeout=5000):
         """
-        Очікує на відповідь від пристрою через UART.
+        Waits for a response from the device via UART.
 
-        Повертає:
-            str: Рядок відповіді, або спеціальні значення "ERROR" чи "TIMEOUT".
+        Args:
+            timeout (int): Timeout in milliseconds for waiting for a response. Default is 5000.
 
-        Примітки:
-            - Завершує читання, якщо виявлено "OK", "ERROR" або "TIMEOUT" у відповіді.
+        Returns:
+            str: The response line, or special values "ERROR" or "TIMEOUT".
+
+        Notes:
+            - Reading stops if "OK", "ERROR", or "TIMEOUT" is found in the response.
         """
         response = ""
         start_time = utime.ticks_ms()
