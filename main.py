@@ -29,7 +29,6 @@ led_main = Pin(LED_MAIN_PIN, Pin.OUT)
 # Ініціалізація модуля SIM7020
 sim7020 = SIM7020(UART_PORT, UART_BAUDRATE, APN, PWR_EN_PIN)
 
-
 # Включення живлення
 sim7020.power_on(PWR_EN_PIN)
 utime.sleep(2)
