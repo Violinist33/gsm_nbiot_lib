@@ -254,9 +254,6 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 
 - **Antonii Lupandin** — V. N. Karazin Kharkiv National University ([anlupandin@icloud.com](mailto:anlupandin@icloud.com))
 - **Volodymyr Kopieikin** — V. N. Karazin Kharkiv National University
-- **Maksym Khruslov** — V. N. Karazin Kharkiv National University
-- **Iryna Artyshchuk** — University of the National Education Commission, Krakow
-- **Ruslan Shevchuk** — University of Bielsko-Biala / West Ukrainian National University ([rshevchuk@ubb.edu.pl](mailto:rshevchuk@ubb.edu.pl))
 
 ## Acknowledgements
 
