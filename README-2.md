@@ -252,7 +252,7 @@ Distributed under the MIT License. See [LICENSE](./LICENSE) for details.
 
 ## Authors
 
-- **Antonii Lupandin** — V. N. Karazin Kharkiv National University ([anlupandin@icloud.com](mailto:anlupandin@icloud.com))
+- **Antonii Lupandin** — V. N. Karazin Kharkiv National University ([anlupandin@gmail.com](mailto:anlupandin@gmail.com))
 - **Volodymyr Kopieikin** — V. N. Karazin Kharkiv National University
 
 ## Acknowledgements
